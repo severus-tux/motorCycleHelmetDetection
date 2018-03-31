@@ -148,15 +148,15 @@ int main(int argc, char* argv[])
         currentFrameBlobs.clear();
 		currentFrameBlobs.shrink_to_fit();
         frame1 = frame2.clone();           // move frame 1 up to where frame 2 is
-
-        if (capVideo.isOpened())
-            capVideo.read(frame2);
-        else
+		capVideo.read(frame2);
+		
+        if (frame2.empty())
         {
-            time_t now = time(0);
+        	time_t now = time(0);
 			char* dt = strtok(ctime(&now), "\n");
             std::cout << dt << ",EOF" << std::endl;
             logfile.close();
+            std::cout << "Video input ended\nSaving log file...\nExiting..\n";
             return(0); // end?
         }
 
