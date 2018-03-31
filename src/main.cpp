@@ -21,7 +21,7 @@ void matchCurrentFrameBlobsToExistingBlobs(std::vector<Blob> &existingBlobs, std
 void addBlobToExistingBlobs(Blob &currentFrameBlob, std::vector<Blob> &existingBlobs, int &index);
 void addNewBlob(Blob &currentFrameBlob, std::vector<Blob> &existingBlobs);
 double distanceBetweenPoints(cv::Point point1, cv::Point point2);
-bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &intVerticalLinePosition, std::ofstream &logfile, cv::Mat &frame);
+bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &intVerticalLinePosition, std::ofstream &logfile, cv::Mat &frame, int &counterLeft, int &counterRight);
 
 int main(int argc, char* argv[])
 {
@@ -45,6 +45,8 @@ int main(int argc, char* argv[])
 	cv::Point crossingLine[2];
 
 	capVideo.open(argv[1]);
+	
+	int counterLeft = 0, counterRight = 0;
 
 	// log file
 	logfile.open ("LOG-" + std::to_string(time(0)) + ".txt");
@@ -140,7 +142,7 @@ int main(int argc, char* argv[])
         else
             matchCurrentFrameBlobsToExistingBlobs(blobs, currentFrameBlobs);
 		
-		checkIfBlobsCrossedTheLine(blobs, verticalLinePosition, logfile, frame2);
+		checkIfBlobsCrossedTheLine(blobs, verticalLinePosition, logfile, frame2,counterLeft,counterRight);
         cv::line(frame1, crossingLine[0], crossingLine[1], SCALAR_BLUE, 2);
         cv::imshow("frame1", frame1);
         currentFrameBlobs.clear();
@@ -242,7 +244,7 @@ double distanceBetweenPoints(cv::Point point1, cv::Point point2)
     return(sqrt(pow(intX, 2) + pow(intY, 2)));
 }
 
-bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosition, std::ofstream &logfile, cv::Mat &frame)
+bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosition, std::ofstream &logfile, cv::Mat &frame,  int &counterLeft, int &counterRight)
 {
     bool atLeastOneBlobCrossedTheLine = 0;
 
@@ -256,6 +258,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 			//going left
             if (blob.centerPositions[prevFrameIndex].x > verticalLinePosition && blob.centerPositions[currFrameIndex].x <= verticalLinePosition)
             {
+            	counterLeft++;
                 time_t now = time(0);
 				char* dt = strtok(ctime(&now), "\n");
                 std::cout << dt << ", (Left)" << std::endl;
@@ -263,12 +266,13 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
                 atLeastOneBlobCrossedTheLine = true;
       			
       			cv::Mat ROI = frame(blob.currentBoundingRect);
-      			cv::imwrite("./../blob_images/left-"+std::to_string(time(0))+".jpg",ROI);
+      			cv::imwrite("./../blob_images/left-"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROI);
             }
             
             // going right
             if (blob.centerPositions[prevFrameIndex].x < verticalLinePosition && blob.centerPositions[currFrameIndex].x >= verticalLinePosition)
             {
+            	counterRight++;
                 time_t now = time(0);
 				char* dt = strtok(ctime(&now), "\n");
                 std::cout << dt << ", (Right)" << std::endl;
@@ -277,7 +281,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
                 
                 
       			cv::Mat ROI = frame(blob.currentBoundingRect);
-      			cv::imwrite("./../blob_images/right-"+std::to_string(time(0))+".jpg",ROI);
+      			cv::imwrite("./../blob_images/right-"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROI);
             }
         }
 
