@@ -143,8 +143,6 @@ int main(int argc, char* argv[])
 		checkIfBlobsCrossedTheLine(blobs, verticalLinePosition, logfile);
         cv::line(frame1, crossingLine[0], crossingLine[1], SCALAR_BLUE, 2);
         cv::imshow("frame1", frame1);
-
-
         currentFrameBlobs.clear();
 		currentFrameBlobs.shrink_to_fit();
         frame1 = frame2.clone();           // move frame 1 up to where frame 2 is
