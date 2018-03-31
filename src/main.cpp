@@ -141,8 +141,8 @@ int main(int argc, char* argv[])
             matchCurrentFrameBlobsToExistingBlobs(blobs, currentFrameBlobs);
 		
 		checkIfBlobsCrossedTheLine(blobs, verticalLinePosition, logfile);
-        cv::line(frame2Copy, crossingLine[0], crossingLine[1], SCALAR_BLUE, 2);
-        cv::imshow("frame2Copy", frame2Copy);
+        cv::line(frame1, crossingLine[0], crossingLine[1], SCALAR_BLUE, 2);
+        cv::imshow("frame1", frame1);
 
 
         currentFrameBlobs.clear();
