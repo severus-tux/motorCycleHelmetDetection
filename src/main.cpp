@@ -1,8 +1,9 @@
-#include<opencv2/core/core.hpp>
-#include<opencv2/highgui/highgui.hpp>
-#include<opencv2/imgproc/imgproc.hpp>
-
-#include<iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/bgsegm.hpp>
+#include <opencv2/video.hpp>
+#include <iostream>
 #include <fstream>		// file utils
 #include <ctime>		// timestamp
 
@@ -15,6 +16,12 @@ const cv::Scalar SCALAR_YELLOW = cv::Scalar(0.0, 255.0, 255.0);
 const cv::Scalar SCALAR_GREEN = cv::Scalar(0.0, 200.0, 0.0);
 const cv::Scalar SCALAR_RED = cv::Scalar(0.0, 0.0, 255.0);
 const cv::Scalar SCALAR_BLUE = cv::Scalar(255.0, 0.0, 0.0);
+
+cv::Mat structuringElement3x3 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+cv::Mat structuringElement5x5 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+cv::Mat structuringElement7x7 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
+cv::Mat structuringElement15x15 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15));
+
 
 // function prototypes 
 void matchCurrentFrameBlobsToExistingBlobs(std::vector<Blob> &existingBlobs, std::vector<Blob> &currentFrameBlobs);
@@ -36,14 +43,12 @@ int main(int argc, char* argv[])
 
 	cv::VideoCapture capVideo;
 	std::ofstream logfile; // log file
-
-	cv::Mat frame1;
-	cv::Mat frame2;
-
+	cv::Mat frame1, frame2, difference, thresh, fgMask;
 	std::vector<Blob> blobs;
-
 	cv::Point crossingLine[2];
 
+	cv::Ptr<cv::BackgroundSubtractor> fg;
+	fg=cv::createBackgroundSubtractorMOG2(500,16,false);//CNT(1,false,30*60,true);
 	capVideo.open(argv[1]);
 	
 	int counterLeft = 0, counterRight = 0;
@@ -83,26 +88,21 @@ int main(int argc, char* argv[])
     while (capVideo.isOpened())
     {
         std::vector<Blob> currentFrameBlobs;
-
+		std::vector<std::vector<cv::Point> > contours;
+		
         cv::Mat frame1Copy = frame1.clone();
         cv::Mat frame2Copy = frame2.clone();
-        cv::Mat difference;
-        cv::Mat thresh;
 
         cv::cvtColor(frame1Copy, frame1Copy, CV_BGR2GRAY);
         cv::cvtColor(frame2Copy, frame2Copy, CV_BGR2GRAY);
-
         cv::GaussianBlur(frame1Copy, frame1Copy, cv::Size(5, 5), 0);
         cv::GaussianBlur(frame2Copy, frame2Copy, cv::Size(5, 5), 0);
+        
         cv::absdiff(frame1Copy, frame2Copy, difference);
         cv::threshold(difference, thresh, 30, 255.0, CV_THRESH_BINARY);
-
-
-        cv::Mat structuringElement3x3 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-        cv::Mat structuringElement5x5 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
-        cv::Mat structuringElement7x7 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
-        cv::Mat structuringElement15x15 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15));
-
+        
+        fg->apply(frame2Copy,fgMask,-1);
+		cv::imshow("fgMask", fgMask);
         for (unsigned int i = 0; i < 2; i++)
         {
             cv::dilate(thresh, thresh, structuringElement5x5);
@@ -111,8 +111,6 @@ int main(int argc, char* argv[])
         }
         cv::imshow("imgThresh", thresh);
         cv::Mat threshCopy = thresh.clone();
-        std::vector<std::vector<cv::Point> > contours;
-
         cv::findContours(threshCopy, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
         std::vector<std::vector<cv::Point> > convexHulls(contours.size());
 
@@ -289,3 +287,4 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 
     return atLeastOneBlobCrossedTheLine;
 }
+
