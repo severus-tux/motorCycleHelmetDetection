@@ -21,7 +21,7 @@ void matchCurrentFrameBlobsToExistingBlobs(std::vector<Blob> &existingBlobs, std
 void addBlobToExistingBlobs(Blob &currentFrameBlob, std::vector<Blob> &existingBlobs, int &index);
 void addNewBlob(Blob &currentFrameBlob, std::vector<Blob> &existingBlobs);
 double distanceBetweenPoints(cv::Point point1, cv::Point point2);
-bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &intVerticalLinePosition, std::ofstream &logfile);
+bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &intVerticalLinePosition, std::ofstream &logfile, cv::Mat &frame);
 
 int main(int argc, char* argv[])
 {
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
         else
             matchCurrentFrameBlobsToExistingBlobs(blobs, currentFrameBlobs);
 		
-		checkIfBlobsCrossedTheLine(blobs, verticalLinePosition, logfile);
+		checkIfBlobsCrossedTheLine(blobs, verticalLinePosition, logfile, frame2);
         cv::line(frame1, crossingLine[0], crossingLine[1], SCALAR_BLUE, 2);
         cv::imshow("frame1", frame1);
         currentFrameBlobs.clear();
@@ -242,7 +242,7 @@ double distanceBetweenPoints(cv::Point point1, cv::Point point2)
     return(sqrt(pow(intX, 2) + pow(intY, 2)));
 }
 
-bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosition, std::ofstream &logfile)
+bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosition, std::ofstream &logfile, cv::Mat &frame)
 {
     bool atLeastOneBlobCrossedTheLine = 0;
 
@@ -261,6 +261,9 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
                 std::cout << dt << ", (Left)" << std::endl;
                 logfile << dt << ", (Left)" << std::endl;
                 atLeastOneBlobCrossedTheLine = true;
+      			
+      			cv::Mat ROI = frame(blob.currentBoundingRect);
+      			cv::imwrite("./../blob_images/left-"+std::to_string(time(0))+".jpg",ROI);
             }
             
             // going right
@@ -271,6 +274,10 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
                 std::cout << dt << ", (Right)" << std::endl;
                 logfile << dt << ", (Right)" << std::endl;
                 atLeastOneBlobCrossedTheLine = 2;
+                
+                
+      			cv::Mat ROI = frame(blob.currentBoundingRect);
+      			cv::imwrite("./../blob_images/right-"+std::to_string(time(0))+".jpg",ROI);
             }
         }
 
