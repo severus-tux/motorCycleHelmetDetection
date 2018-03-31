@@ -289,3 +289,4 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 
     return atLeastOneBlobCrossedTheLine;
 }
+
