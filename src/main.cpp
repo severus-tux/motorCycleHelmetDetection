@@ -249,7 +249,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 				std::cout << dt << ", (Left)" << std::endl;
 				logfile << dt << ", (Left)" << std::endl;
 				atLeastOneBlobCrossedTheLine = true;
-				blob.extractROI(frame,true);
+				blob.extractROI(frame,true); // left = true
 			}
 
 			// going right
@@ -260,7 +260,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 				std::cout << dt << ", (Right)" << std::endl;
 				logfile << dt << ", (Right)" << std::endl;
 				atLeastOneBlobCrossedTheLine = 2;
-				blob.extractROI(frame,false);
+				blob.extractROI(frame,false); // left = false
 			}
 		}
 
