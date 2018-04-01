@@ -1,5 +1,8 @@
 #include "../include/Blob.h"
 
+int Blob::counterLeft=0;
+int Blob::counterRight=0;
+
 Blob::Blob(std::vector<cv::Point> contour)
 {
     currentContour = contour;
@@ -39,4 +42,22 @@ void Blob::predictNextPosition(void)
 	predictedNextPosition.x = centerPositions.back().x + deltaX;
 	predictedNextPosition.y = centerPositions.back().y + deltaY;
 
+}
+
+void Blob::extractROI(cv::Mat &frame, bool left)
+{
+	if(left)
+	{
+		directionLeft = true;
+		counterLeft++;
+		cv::Mat ROI = frame(currentBoundingRect);
+		cv::imwrite("./../blob_images/left-"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROI);
+	}
+	else
+	{
+		directionLeft = false;
+		counterRight++;
+		cv::Mat ROI = frame(currentBoundingRect);
+		cv::imwrite("./../blob_images/right-"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROI);
+	}
 }

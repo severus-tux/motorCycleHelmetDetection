@@ -17,6 +17,8 @@ const cv::Scalar SCALAR_GREEN = cv::Scalar(0.0, 200.0, 0.0);
 const cv::Scalar SCALAR_RED = cv::Scalar(0.0, 0.0, 255.0);
 const cv::Scalar SCALAR_BLUE = cv::Scalar(255.0, 0.0, 0.0);
 
+
+cv::Mat frame,fgMask;
 cv::Mat structuringElement3x3 = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
 cv::Mat structuringElement5x5 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
 cv::Mat structuringElement7x7 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
@@ -28,7 +30,7 @@ void matchCurrentFrameBlobsToExistingBlobs(std::vector<Blob> &existingBlobs, std
 void addBlobToExistingBlobs(Blob &currentFrameBlob, std::vector<Blob> &existingBlobs, int &index);
 void addNewBlob(Blob &currentFrameBlob, std::vector<Blob> &existingBlobs);
 double distanceBetweenPoints(cv::Point point1, cv::Point point2);
-bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &intVerticalLinePosition, std::ofstream &logfile, cv::Mat &frame, int &counterLeft, int &counterRight);
+bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &intVerticalLinePosition, std::ofstream &logfile);
 
 int main(int argc, char* argv[])
 {
@@ -43,7 +45,6 @@ int main(int argc, char* argv[])
 
 	cv::VideoCapture capVideo;
 	std::ofstream logfile; // log file
-	cv::Mat frame,fgMask;
 	std::vector<Blob> blobs;
 	cv::Point crossingLine[2];
 
@@ -51,7 +52,6 @@ int main(int argc, char* argv[])
 	fg=cv::createBackgroundSubtractorMOG2(500,16,false);//CNT(1,false,30*60,true);
 	capVideo.open(argv[1]);
 
-	int counterLeft = 0, counterRight = 0;
 
 	// log file
 	logfile.open ("LOG-" + std::to_string(time(0)) + ".txt");
@@ -90,16 +90,13 @@ int main(int argc, char* argv[])
 		std::vector<std::vector<cv::Point> > contours;
 
 		cv::Mat frameCopy = frame.clone();
-		//        cv::Mat frame2Copy = frame2.clone();
 
 		cv::cvtColor(frameCopy, frameCopy, CV_BGR2GRAY);
-		//        cv::cvtColor(frame2Copy, frame2Copy, CV_BGR2GRAY);
 		cv::GaussianBlur(frameCopy, frameCopy, cv::Size(5, 5), 0);
 		cv::medianBlur(frameCopy, frameCopy, 5);
-		//        cv::absdiff(frame1Copy, frame2Copy, difference);
-		//        cv::threshold(difference, thresh, 30, 255.0, CV_THRESH_BINARY);
 
 		fg->apply(frameCopy,fgMask,-1);
+
 		cv::Mat fgMaskCopy = fgMask.clone();
 		cv::morphologyEx(fgMask,fgMask,cv::MORPH_OPEN,structuringElement3x3,cv::Point(-1,-1),3,cv::BORDER_CONSTANT);
 		cv::dilate(fgMask, fgMask, structuringElement5x5);
@@ -134,7 +131,7 @@ int main(int argc, char* argv[])
 		else
 			matchCurrentFrameBlobsToExistingBlobs(blobs, currentFrameBlobs);
 
-		checkIfBlobsCrossedTheLine(blobs, verticalLinePosition, logfile, frame,counterLeft,counterRight);
+		checkIfBlobsCrossedTheLine(blobs, verticalLinePosition, logfile);
 		cv::line(frame, crossingLine[0], crossingLine[1], SCALAR_BLUE, 2);
 		cv::imshow("frame", frame);
 		currentFrameBlobs.clear();
@@ -233,7 +230,7 @@ double distanceBetweenPoints(cv::Point point1, cv::Point point2)
 	return(sqrt(pow(intX, 2) + pow(intY, 2)));
 }
 
-bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosition, std::ofstream &logfile, cv::Mat &frame,  int &counterLeft, int &counterRight)
+bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosition, std::ofstream &logfile)
 {
 	bool atLeastOneBlobCrossedTheLine = 0;
 
@@ -247,32 +244,28 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 			//going left
 			if (blob.centerPositions[prevFrameIndex].x > verticalLinePosition && blob.centerPositions[currFrameIndex].x <= verticalLinePosition)
 			{
-				counterLeft++;
 				time_t now = time(0);
 				char* dt = strtok(ctime(&now), "\n");
 				std::cout << dt << ", (Left)" << std::endl;
 				logfile << dt << ", (Left)" << std::endl;
 				atLeastOneBlobCrossedTheLine = true;
-
-				cv::Mat ROI = frame(blob.currentBoundingRect);
-				cv::imwrite("./../blob_images/left-"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROI);
+				blob.extractROI(frame,true);
 			}
 
 			// going right
 			if (blob.centerPositions[prevFrameIndex].x < verticalLinePosition && blob.centerPositions[currFrameIndex].x >= verticalLinePosition)
 			{
-				counterRight++;
 				time_t now = time(0);
 				char* dt = strtok(ctime(&now), "\n");
 				std::cout << dt << ", (Right)" << std::endl;
 				logfile << dt << ", (Right)" << std::endl;
 				atLeastOneBlobCrossedTheLine = 2;
-
-				cv::Mat ROI = frame(blob.currentBoundingRect);
-				cv::imwrite("./../blob_images/right-"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROI);
+				blob.extractROI(frame,false);
 			}
 		}
 
 	}
 		return atLeastOneBlobCrossedTheLine;
 }
+
+
