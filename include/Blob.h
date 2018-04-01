@@ -28,7 +28,7 @@ class Blob
 		// function prototypes 
 		Blob(std::vector<cv::Point> contour);
 		void predictNextPosition(void);
-		void extractROI(cv::Mat &frame, bool left);
+		void extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left);
 
 };
 

@@ -98,10 +98,10 @@ int main(int argc, char* argv[])
 		fg->apply(frameCopy,fgMask,-1);
 
 		cv::Mat fgMaskCopy = fgMask.clone();
-		cv::morphologyEx(fgMask,fgMask,cv::MORPH_OPEN,structuringElement3x3,cv::Point(-1,-1),3,cv::BORDER_CONSTANT);
-		cv::dilate(fgMask, fgMask, structuringElement5x5);
-		cv::dilate(fgMask, fgMask, structuringElement5x5);
-		cv::imshow("fgMask", fgMask);
+		cv::morphologyEx(fgMaskCopy,fgMaskCopy,cv::MORPH_OPEN,structuringElement3x3,cv::Point(-1,-1),3,cv::BORDER_CONSTANT);
+		cv::dilate(fgMaskCopy, fgMaskCopy, structuringElement5x5);
+		cv::dilate(fgMaskCopy, fgMaskCopy, structuringElement5x5);
+		cv::imshow("fgMask", fgMaskCopy);
 		cv::findContours(fgMask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 		std::vector<std::vector<cv::Point> > convexHulls(contours.size());
 
@@ -249,7 +249,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 				std::cout << dt << ", (Left)" << std::endl;
 				logfile << dt << ", (Left)" << std::endl;
 				atLeastOneBlobCrossedTheLine = true;
-				blob.extractROI(frame,true); // left = true
+				blob.extractROI(frame,fgMask,true); // left = true
 			}
 
 			// going right
@@ -260,7 +260,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 				std::cout << dt << ", (Right)" << std::endl;
 				logfile << dt << ", (Right)" << std::endl;
 				atLeastOneBlobCrossedTheLine = 2;
-				blob.extractROI(frame,false); // left = false
+				blob.extractROI(frame,fgMask,false); // left = false
 			}
 		}
 
