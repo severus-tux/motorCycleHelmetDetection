@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 			std::cout << dt << ",EOF" << std::endl;
 			logfile.close();
 			std::cout << "Video input ended\nSaving log file...\nExiting..\n";
-			return(0); // end?
+			return(0);
 		}
 
 		firstFrame = false;
