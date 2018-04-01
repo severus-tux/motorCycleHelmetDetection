@@ -31,6 +31,7 @@ void addBlobToExistingBlobs(Blob &currentFrameBlob, std::vector<Blob> &existingB
 void addNewBlob(Blob &currentFrameBlob, std::vector<Blob> &existingBlobs);
 double distanceBetweenPoints(cv::Point point1, cv::Point point2);
 bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &intVerticalLinePosition, std::ofstream &logfile);
+void drawBoundingRectangle(cv::Rect currentBoundingRect);
 
 int main(int argc, char* argv[])
 {
@@ -102,7 +103,7 @@ int main(int argc, char* argv[])
 		cv::dilate(fgMaskCopy, fgMaskCopy, structuringElement5x5);
 		cv::dilate(fgMaskCopy, fgMaskCopy, structuringElement5x5);
 		cv::imshow("fgMask", fgMaskCopy);
-		cv::findContours(fgMask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+		cv::findContours(fgMaskCopy, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 		std::vector<std::vector<cv::Point> > convexHulls(contours.size());
 
 		for (unsigned int i = 0; i < contours.size(); i++)
@@ -121,6 +122,7 @@ int main(int argc, char* argv[])
 			(cv::contourArea(possibleBlob.currentContour) / (double)possibleBlob.currentBoundingRect.area()) > 0.50)
 			{
 				currentFrameBlobs.push_back(possibleBlob);
+				drawBoundingRectangle(possibleBlob.currentBoundingRect);
 			}
 		}
 
@@ -268,4 +270,8 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 		return atLeastOneBlobCrossedTheLine;
 }
 
-
+void drawBoundingRectangle(cv::Rect currentBoundingRect)
+{
+	cv::rectangle(frame, currentBoundingRect, SCALAR_RED, 2);
+	//C++: void rectangle(Mat& img, Rect rec, const Scalar& color, int thickness=1, int lineType=8, int shift=0 )
+}
