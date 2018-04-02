@@ -106,6 +106,7 @@ int main(int argc, char* argv[])
 		frameCopy2 = frame.clone();
 
 		cv::cvtColor(frameCopy, frameCopy, CV_BGR2GRAY);
+//		cv::cvtColor(frameCopy2, frameCopy2, CV_BGR2GRAY);
 		cv::GaussianBlur(frameCopy, frameCopy, cv::Size(5, 5), 0);
 		cv::medianBlur(frameCopy, frameCopy, 5);
 
@@ -140,6 +141,11 @@ int main(int argc, char* argv[])
 				drawBoundingRectangle(possibleBlob.currentBoundingRect);
 			}
 		}
+		
+//		if(currentFrameBlobs.size() == 0)
+//		{
+//			cv::imwrite("/home/severus/img_proc_learning/motorCycleHelmetDetection/bg/bg-"+ std::to_string(time(0)) +".jpg",frameCopy2);
+//		}
 
 		if (firstFrame == true)
 			for (auto &currentFrameBlob : currentFrameBlobs)
