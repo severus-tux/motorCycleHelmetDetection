@@ -48,6 +48,8 @@ void Blob::extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left)
 {
 	cv::Rect topRegion(currentBoundingRect.x,currentBoundingRect.y,currentBoundingRect.width,(int)currentBoundingRect.height*0.25);
 	cv::Mat ROITop = fgMask(topRegion);
+	cv::Mat ROITopGrayScale = frame(topRegion);
+	cv::cvtColor(ROITopGrayScale,ROITopGrayScale,CV_BGR2GRAY);
 	cv::Mat ROI = frame(currentBoundingRect);
 
 	if(left)
@@ -55,13 +57,15 @@ void Blob::extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left)
 		directionLeft = true;
 		counterLeft++;
 		cv::imwrite("./../blob_images/left-"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROI);
-		cv::imwrite("./../blob_images/left-TOP"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROITop);
+//		cv::imwrite("./../blob_images/left-TOP"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROITop);
+		cv::imwrite("./../blob_images/left-TOP-Gray"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROITopGrayScale);
 	}
 	else
 	{
 		directionLeft = false;
 		counterRight++;
 		cv::imwrite("./../blob_images/right-"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROI);
-		cv::imwrite("./../blob_images/right-TOP"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROITop);
+//		cv::imwrite("./../blob_images/right-TOP"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROITop);
+		cv::imwrite("./../blob_images/right-TOP-Gray"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROITopGrayScale);
 	}
 }

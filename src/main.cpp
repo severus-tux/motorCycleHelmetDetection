@@ -18,7 +18,7 @@ const cv::Scalar SCALAR_RED = cv::Scalar(0.0, 0.0, 255.0);
 const cv::Scalar SCALAR_BLUE = cv::Scalar(255.0, 0.0, 0.0);
 
 
-cv::Mat frame,fgMask;
+cv::Mat frame,fgMask, frameCopy, frameCopy2;
 cv::Mat structuringElement3x3 = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
 cv::Mat structuringElement5x5 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
 cv::Mat structuringElement7x7 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
@@ -90,7 +90,8 @@ int main(int argc, char* argv[])
 		std::vector<Blob> currentFrameBlobs;
 		std::vector<std::vector<cv::Point> > contours;
 
-		cv::Mat frameCopy = frame.clone();
+		frameCopy = frame.clone();
+		frameCopy2 = frame.clone();
 
 		cv::cvtColor(frameCopy, frameCopy, CV_BGR2GRAY);
 		cv::GaussianBlur(frameCopy, frameCopy, cv::Size(5, 5), 0);
@@ -102,13 +103,15 @@ int main(int argc, char* argv[])
 		cv::morphologyEx(fgMaskCopy,fgMaskCopy,cv::MORPH_OPEN,structuringElement3x3,cv::Point(-1,-1),3,cv::BORDER_CONSTANT);
 		cv::dilate(fgMaskCopy, fgMaskCopy, structuringElement5x5);
 		cv::dilate(fgMaskCopy, fgMaskCopy, structuringElement5x5);
-		cv::imshow("fgMask", fgMaskCopy);
 		cv::findContours(fgMaskCopy, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 		std::vector<std::vector<cv::Point> > convexHulls(contours.size());
 
 		for (unsigned int i = 0; i < contours.size(); i++)
 			cv::convexHull(contours[i], convexHulls[i]);
-
+		
+//		cv::drawContours(fgMaskCopy,convexHulls,-1,SCALAR_WHITE,-1);		
+//		cv::imshow("fgMaskCopy", fgMaskCopy);
+		
 		for (auto &convexHull : convexHulls)
 		{
 			Blob possibleBlob(convexHull);
@@ -251,7 +254,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 				std::cout << dt << ", (Left)" << std::endl;
 				logfile << dt << ", (Left)" << std::endl;
 				atLeastOneBlobCrossedTheLine = true;
-				blob.extractROI(frame,fgMask,true); // left = true
+				blob.extractROI(frameCopy2,fgMask,true); // left = true
 			}
 
 			// going right
@@ -262,7 +265,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 				std::cout << dt << ", (Right)" << std::endl;
 				logfile << dt << ", (Right)" << std::endl;
 				atLeastOneBlobCrossedTheLine = 2;
-				blob.extractROI(frame,fgMask,false); // left = false
+				blob.extractROI(frameCopy2,fgMask,false); // left = false
 			}
 		}
 
