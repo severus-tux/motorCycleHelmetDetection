@@ -72,13 +72,13 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	capVideo.read(frame);
-
-	int verticalLinePosition = (int)std::round((double)frame.cols * 0.50);
+	int frame_rows = capVideo.get(CV_CAP_PROP_FRAME_HEIGHT);
+	int frame_cols = capVideo.get(CV_CAP_PROP_FRAME_WIDTH);
+	int verticalLinePosition = (int)std::round((double)frame_cols * 0.50);
 
 	crossingLine[0].y = 0;
 	crossingLine[0].x = verticalLinePosition;
-	crossingLine[1].y = frame.rows -1 ; // last pixel *index*
+	crossingLine[1].y = frame_rows -1 ; // last pixel *index*
 	crossingLine[1].x = verticalLinePosition;
 
 	char checkForEscKey = 0;
@@ -89,7 +89,19 @@ int main(int argc, char* argv[])
 	{
 		std::vector<Blob> currentFrameBlobs;
 		std::vector<std::vector<cv::Point> > contours;
-
+		
+		capVideo.read(frame);
+		if (frame.empty())
+		{
+			time_t now = time(0);
+			char* dt = strtok(ctime(&now), "\n");
+			std::cout << dt << ",EOF" << std::endl;
+			logfile << dt << ",EOF" << std::endl;
+			logfile.close();
+			std::cout << "Video input ended\nSaving log file...\nExiting..\n";
+			return(0);
+		}
+		
 		frameCopy = frame.clone();
 		frameCopy2 = frame.clone();
 
@@ -141,18 +153,6 @@ int main(int argc, char* argv[])
 		cv::imshow("frame", frame);
 		currentFrameBlobs.clear();
 		currentFrameBlobs.shrink_to_fit();
-
-		capVideo.read(frame);
-
-		if (frame.empty())
-		{
-			time_t now = time(0);
-			char* dt = strtok(ctime(&now), "\n");
-			std::cout << dt << ",EOF" << std::endl;
-			logfile.close();
-			std::cout << "Video input ended\nSaving log file...\nExiting..\n";
-			return(0);
-		}
 
 		firstFrame = false;
 		frameCount++;
