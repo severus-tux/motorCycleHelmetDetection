@@ -1,6 +1,5 @@
 #ifndef BLOB_H
 #define BLOB_H
-// Shreyas Commented here to check slack
 #include<opencv2/core/core.hpp>
 #include<opencv2/highgui/highgui.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
