@@ -142,10 +142,10 @@ int main(int argc, char* argv[])
 			}
 		}
 		
-//		if(currentFrameBlobs.size() == 0)
-//		{
-//			cv::imwrite("/home/severus/img_proc_learning/motorCycleHelmetDetection/bg/bg-"+ std::to_string(time(0)) +".jpg",frameCopy2);
-//		}
+		if(currentFrameBlobs.size() == 0)
+		{
+			cv::imwrite("/home/severus/img_proc_learning/motorCycleHelmetDetection/bg/bg-"+ std::to_string(time(0)) +".jpg",frameCopy2);
+		}
 
 		if (firstFrame == true)
 			for (auto &currentFrameBlob : currentFrameBlobs)
