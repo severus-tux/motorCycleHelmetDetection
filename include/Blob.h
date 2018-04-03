@@ -1,8 +1,11 @@
 #ifndef BLOB_H
 #define BLOB_H
-#include<opencv2/core/core.hpp>
-#include<opencv2/highgui/highgui.hpp>
-#include<opencv2/imgproc/imgproc.hpp>
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/objdetect.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
 
 class Blob
 {
@@ -27,7 +30,7 @@ class Blob
 		// function prototypes 
 		Blob(std::vector<cv::Point> contour);
 		void predictNextPosition(void);
-		void extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left);
+		void extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left, int isMotorCycle);
 
 };
 

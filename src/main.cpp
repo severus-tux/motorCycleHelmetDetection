@@ -3,6 +3,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/bgsegm.hpp>
 #include <opencv2/video.hpp>
+#include <opencv2/objdetect.hpp>
 #include <iostream>
 #include <fstream>		// file utils
 #include <ctime>		// timestamp
@@ -24,6 +25,9 @@ cv::Mat structuringElement5x5 = cv::getStructuringElement(cv::MORPH_RECT, cv::Si
 cv::Mat structuringElement7x7 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
 cv::Mat structuringElement15x15 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15));
 
+cv::CascadeClassifier bike_cascade;
+std::string bike_cascade_name = "/home/severus/img_proc_learning/motorCycleHelmetDetection/cascade/cascade.xml";
+
 
 // function prototypes 
 void matchCurrentFrameBlobsToExistingBlobs(std::vector<Blob> &existingBlobs, std::vector<Blob> &currentFrameBlobs);
@@ -32,6 +36,7 @@ void addNewBlob(Blob &currentFrameBlob, std::vector<Blob> &existingBlobs);
 double distanceBetweenPoints(cv::Point point1, cv::Point point2);
 bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &intVerticalLinePosition, std::ofstream &logfile);
 void drawBoundingRectangle(cv::Rect currentBoundingRect);
+int detectMotorCycle( cv::Mat ROI, cv::CascadeClassifier &bike_cascade);
 
 int main(int argc, char* argv[])
 {
@@ -42,6 +47,12 @@ int main(int argc, char* argv[])
 				  << "Example : startDetection video/traffic.mp4\n"
 				  << "Example : startDetection http://192.168.1.102:8080/video\n";
 		return 1;
+	}
+	
+	if( !bike_cascade.load( bike_cascade_name ) )
+	{
+		std::cerr << "Error loading bike cascade\n";
+		return -1;
 	}
 
 	cv::VideoCapture capVideo;
@@ -251,7 +262,11 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 		{
 			int prevFrameIndex = (int)blob.centerPositions.size() - 2;
 			int currFrameIndex = (int)blob.centerPositions.size() - 1;
-
+			
+			cv::Mat ROI;
+			ROI = frameCopy2(blob.currentBoundingRect);
+			cv::cvtColor(ROI,ROI,CV_BGR2GRAY);
+			int isMotorCycle = detectMotorCycle(ROI, bike_cascade);
 			//going left
 			if (blob.centerPositions[prevFrameIndex].x > verticalLinePosition && blob.centerPositions[currFrameIndex].x <= verticalLinePosition)
 			{
@@ -260,7 +275,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 				std::cout << dt << ", (Left)" << std::endl;
 				logfile << dt << ", (Left)" << std::endl;
 				atLeastOneBlobCrossedTheLine = true;
-				blob.extractROI(frameCopy2,fgMask,true); // left = true
+				blob.extractROI(frameCopy2,fgMask,true,isMotorCycle); // left = true
 			}
 
 			// going right
@@ -271,7 +286,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 				std::cout << dt << ", (Right)" << std::endl;
 				logfile << dt << ", (Right)" << std::endl;
 				atLeastOneBlobCrossedTheLine = 2;
-				blob.extractROI(frameCopy2,fgMask,false); // left = false
+				blob.extractROI(frameCopy2,fgMask,false,isMotorCycle); // left = false
 			}
 		}
 
@@ -283,4 +298,11 @@ void drawBoundingRectangle(cv::Rect currentBoundingRect)
 {
 	cv::rectangle(frame, currentBoundingRect, SCALAR_RED, 2);
 	//C++: void rectangle(Mat& img, Rect rec, const Scalar& color, int thickness=1, int lineType=8, int shift=0 )
+}
+
+int detectMotorCycle( cv::Mat ROI, cv::CascadeClassifier &bike_cascade)
+{
+	std::vector<cv::Rect> bikes;
+	bike_cascade.detectMultiScale( ROI, bikes, 1.1, 4, 0|cv::CASCADE_SCALE_IMAGE, cv::Size(60, 60) );
+	return bikes.size();
 }
