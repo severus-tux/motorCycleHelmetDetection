@@ -26,7 +26,7 @@ cv::Mat structuringElement7x7 = cv::getStructuringElement(cv::MORPH_RECT, cv::Si
 cv::Mat structuringElement15x15 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15));
 
 cv::CascadeClassifier bike_cascade;
-std::string bike_cascade_name = "/home/severus/img_proc_learning/motorCycleHelmetDetection/cascade/cascade.xml";
+std::string bike_cascade_name = "/home/severus/img_proc_learning/motorCycleHelmetDetection/cascade/cascade-motorcycle_old.xml";
 
 
 // function prototypes 
@@ -303,6 +303,6 @@ void drawBoundingRectangle(cv::Rect currentBoundingRect)
 int detectMotorCycle( cv::Mat ROI, cv::CascadeClassifier &bike_cascade)
 {
 	std::vector<cv::Rect> bikes;
-	bike_cascade.detectMultiScale( ROI, bikes, 1.1, 4, 0|cv::CASCADE_SCALE_IMAGE, cv::Size(60, 60) );
+	bike_cascade.detectMultiScale( ROI, bikes, 1.05, 5, 0/*|cv::CASCADE_SCALE_IMAGE*/, cv::Size(30, 30) );
 	return bikes.size();
 }
