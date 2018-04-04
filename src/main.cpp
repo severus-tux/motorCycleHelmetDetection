@@ -153,10 +153,10 @@ int main(int argc, char* argv[])
 			}
 		}
 		
-		/*if(currentFrameBlobs.size() == 0)
-		{
-			cv::imwrite("/home/severus/img_proc_learning/motorCycleHelmetDetection/bg/bg-"+ std::to_string(time(0)) +".jpg",frameCopy2);
-		}*/
+//		if(currentFrameBlobs.size() == 0)
+//		{
+//			cv::imwrite("/home/severus/img_proc_learning/motorCycleHelmetDetection/bg/bg-"+ std::to_string(time(0)) +".jpg",frameCopy2);
+//		}
 
 		if (firstFrame == true)
 			for (auto &currentFrameBlob : currentFrameBlobs)
@@ -285,7 +285,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 				char* dt = strtok(ctime(&now), "\n");
 				std::cout << dt << ", (Right)" << std::endl;
 				logfile << dt << ", (Right)" << std::endl;
-				atLeastOneBlobCrossedTheLine = true;
+				atLeastOneBlobCrossedTheLine = 2;
 				blob.extractROI(frameCopy2,fgMask,false,isMotorCycle); // left = false
 			}
 		}
