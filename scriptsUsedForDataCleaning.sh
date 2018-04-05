@@ -28,3 +28,4 @@ opencv_createsamples -info bikes.info -num 1000 -w 50 -h 50  -maxxangle 0.5 -max
 
 opencv_traincascade -data data -vec bikes.vec -bg bg.txt -numPos 400 -numNeg 650 -numStages 14 -w 50 -h 50 -precalcValBufSize 4096 -precalcIdxBufSize 4096 -featureType LBP
 
+# NOTE : calculation of numPos and other parameters : https://stackoverflow.com/questions/10863560/haar-training-opencv-assertion-failed
