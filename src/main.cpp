@@ -26,7 +26,7 @@ cv::Mat structuringElement7x7 = cv::getStructuringElement(cv::MORPH_RECT, cv::Si
 cv::Mat structuringElement15x15 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15));
 
 cv::CascadeClassifier bike_cascade;
-std::string bike_cascade_name = "/home/suhas/vishwa_images/motorCycleHelmetDetection/cascade/cascade.xmls";
+std::string bike_cascade_name = "./../cascade/cascade.xml";
 
 
 // function prototypes 
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 			cv::convexHull(contours[i], convexHulls[i]);
 		
 //		cv::drawContours(fgMaskCopy,convexHulls,-1,SCALAR_WHITE,-1);		
-//		cv::imshow("fgMaskCopy", fgMaskCopy);
+		cv::imshow("fgMaskCopy", fgMaskCopy);
 		
 		for (auto &convexHull : convexHulls)
 		{
@@ -255,7 +255,7 @@ double distanceBetweenPoints(cv::Point point1, cv::Point point2)
 bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosition, std::ofstream &logfile)
 {
 	bool atLeastOneBlobCrossedTheLine = 0;
-
+	int width,height;
 	for (auto blob : blobs)
 	{
 		if (blob.stillBeingTracked == true && blob.centerPositions.size() >= 2)
@@ -272,7 +272,8 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 			{
 				time_t now = time(0);
 				char* dt = strtok(ctime(&now), "\n");
-				std::cout << dt << ", (Left)" << std::endl;
+				std::cout << dt << ", (Left)" << ", W=" << blob.currentBoundingRect.width << ",H=" << blob.currentBoundingRect.height << "\t"
+							<< ((float)blob.currentBoundingRect.width/(float)blob.currentBoundingRect.height) << std::endl;
 				logfile << dt << ", (Left)" << std::endl;
 				atLeastOneBlobCrossedTheLine = true;
 				blob.extractROI(frameCopy2,fgMask,true,isMotorCycle); // left = true
@@ -283,7 +284,8 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, int &verticalLinePosit
 			{
 				time_t now = time(0);
 				char* dt = strtok(ctime(&now), "\n");
-				std::cout << dt << ", (Right)" << std::endl;
+				std::cout << dt << ", (Right)" << ", W=" << blob.currentBoundingRect.width << ",H=" << blob.currentBoundingRect.height << "\t"
+								<< ((float)blob.currentBoundingRect.width/(float)blob.currentBoundingRect.height) << std::endl;
 				logfile << dt << ", (Right)" << std::endl;
 				atLeastOneBlobCrossedTheLine = 2;
 				blob.extractROI(frameCopy2,fgMask,false,isMotorCycle); // left = false
