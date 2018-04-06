@@ -26,7 +26,7 @@ cv::Mat structuringElement7x7 = cv::getStructuringElement(cv::MORPH_RECT, cv::Si
 cv::Mat structuringElement15x15 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15));
 
 cv::CascadeClassifier bike_cascade;
-std::string bike_cascade_name = "/home/suhas/vishwa_images/motorCycleHelmetDetection/cascade/cascade.xmls";
+std::string bike_cascade_name = "/home/severus/img_proc_learning/motorCycleHelmetDetection/cascade/cascade.xml";
 
 
 // function prototypes 
