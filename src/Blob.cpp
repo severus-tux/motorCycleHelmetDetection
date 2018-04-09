@@ -1,10 +1,4 @@
-#include "../include/Blob.h"
-#include "opencv2/core/core.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/objdetect.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgproc.hpp"
+#include "Blob.h"
 
 int Blob::counterLeft=0;
 int Blob::counterRight=0;
@@ -68,8 +62,6 @@ void Blob::extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left, int isMotorCyc
 			cv::imwrite("./../blob_images/Bike-left-"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROI);
 		else
 			cv::imwrite("./../blob_images/Other-left-"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROI);
-//		cv::imwrite("./../blob_images/left-TOP"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROITop);
-//		cv::imwrite("./../blob_images/left-TOP-Gray"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROITopGrayScale);
 	}
 	else
 	{
@@ -80,7 +72,5 @@ void Blob::extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left, int isMotorCyc
 			cv::imwrite("./../blob_images/Bike-right-"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROI);
 		else
 			cv::imwrite("./../blob_images/Other-right-"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROI);
-//		cv::imwrite("./../blob_images/right-TOP"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROITop);
-//		cv::imwrite("./../blob_images/right-TOP-Gray"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROITopGrayScale);
 	}
 }
