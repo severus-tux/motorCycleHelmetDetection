@@ -6,6 +6,10 @@
 #include "opencv2/objdetect.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
+#include "opencv2/ml.hpp"
+#include "opencv2/objdetect.hpp"
+
+#include <iostream>
 
 class Blob
 {
@@ -30,7 +34,8 @@ class Blob
 		// function prototypes 
 		Blob(std::vector<cv::Point> contour);
 		void predictNextPosition(void);
-		void extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left, int isMotorCycle);
+		void extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left);
+		bool classifyMotorBike(cv::Mat &frame, cv::HOGDescriptor &hog);
 
 };
 

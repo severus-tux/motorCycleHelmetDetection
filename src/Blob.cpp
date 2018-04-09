@@ -44,7 +44,7 @@ void Blob::predictNextPosition(void)
 
 }
 
-void Blob::extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left, int isMotorCycle)
+void Blob::extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left)
 {
 	cv::Rect topRegion(currentBoundingRect.x,currentBoundingRect.y,currentBoundingRect.width,(int)currentBoundingRect.height*0.25);
 	cv::Mat ROITop = fgMask(topRegion);
@@ -57,20 +57,28 @@ void Blob::extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left, int isMotorCyc
 	{
 		directionLeft = true;
 		counterLeft++;
-		
-		if(isMotorCycle>0)
-			cv::imwrite("./../blob_images/Bike-left-"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROI);
-		else
-			cv::imwrite("./../blob_images/Other-left-"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROI);
+		cv::imwrite("./../blob_images/left-"+std::to_string(counterLeft)+"-"+std::to_string(time(0))+".jpg",ROI);
 	}
 	else
 	{
 		directionLeft = false;
 		counterRight++;
-		
-		if(isMotorCycle>0)
-			cv::imwrite("./../blob_images/Bike-right-"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROI);
-		else
-			cv::imwrite("./../blob_images/Other-right-"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROI);
+		cv::imwrite("./../blob_images/right-"+std::to_string(counterRight)+"-"+std::to_string(time(0))+".jpg",ROI);
 	}
+}
+
+bool Blob::classifyMotorBike(cv::Mat &frame, cv::HOGDescriptor &hog)
+{
+	std::vector< cv::Rect > detections;
+	std::vector< double > foundWeights;
+	cv::Mat ROI = frame(currentBoundingRect);
+	cv::cvtColor(ROI,ROI,CV_BGR2GRAY);
+	hog.detectMultiScale( ROI, detections, foundWeights );
+	
+	for ( size_t j = 0; j < detections.size(); j++ )
+		if( foundWeights[j] >= 0.5 )
+			return true;
+	
+	return false;
+        		
 }

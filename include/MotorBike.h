@@ -2,8 +2,6 @@
 #define MOTORBIKE_H
 
 #include "Blob.h"
-#include "opencv2/core/core.hpp"
-
 
 class MotorBike : public Blob
 {
@@ -12,9 +10,9 @@ class MotorBike : public Blob
 		int riderCount;
 		int HelmetCount;		
 		
+		MotorBike(const Blob &blob);
 		int countRiders();
 		int detectHelmet();
-		void extractROI();
 };
 
 #endif 
