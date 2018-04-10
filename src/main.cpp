@@ -188,6 +188,12 @@ int main(int argc, char* argv[])
 				cv::Mat ROI = frame(mb.currentBoundingRect);
 				cv::imwrite("./../bikes/Bike-"+std::to_string(time(0))+".jpg",ROI);
 			}
+			
+			else
+			{
+				cv::Mat ROI = frame(myBlob.currentBoundingRect);
+				cv::imwrite("./../blob_images/Other-"+std::to_string(time(0))+".jpg",ROI);
+			}
 		}
 		
 		for( int i=0; i<blobs.size(); i++)
@@ -312,7 +318,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, std::vector<Blob> &cro
 				logfile << dt << ", (Left)" << std::endl;
 				atLeastOneBlobCrossedTheLine = true;
 				currentBlobCrossedTheLine = true;
-				blob.extractROI(frame, fgMask, true);
+				//blob.extractROI(frame, fgMask, true);
 			}
 
 			// going right
@@ -325,7 +331,7 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, std::vector<Blob> &cro
 				logfile << dt << ", (Right)" << std::endl;
 				atLeastOneBlobCrossedTheLine = true;
 				currentBlobCrossedTheLine = true;
-				blob.extractROI(frame, fgMask, false);
+				//blob.extractROI(frame, fgMask, false);
 			}
 			
 			if(currentBlobCrossedTheLine)
