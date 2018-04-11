@@ -63,7 +63,8 @@ int main(int argc, char* argv[])
 	logfile.open ("LOG-" + std::to_string(time(0)) + ".txt");
 	std::cout << "Logging to: \"LOG-" << std::to_string(time(0)) << ".txt\"" << std::endl;
 
-	logfile << "\"Timestamp\t\t\t\t\", \"Direction\", \"Wearing Helmet?\", \"Triple Riding?\"" << std::endl;
+	logfile << "\"Timestamp\t\", \"Direction\", \"Vehicle Type\", \"Triple Riding?\", \"Wearing Helmet\"" << std::endl;
+	std::clog << "\"Timestamp\t\", \"Direction\", \"Vehicle Type\", \"Triple Riding?\",  \"Wearing Helmet\"" << std::endl;
 
 	if (!capVideo.isOpened())
 	{                                                 // if unable to open video file
@@ -178,6 +179,16 @@ int main(int argc, char* argv[])
 		{
 			MotorBike mb(myBlob); //Copy Constructor
 			
+			std::string dir;
+			
+			if ( myBlob.directionLeft )
+				dir = "left";
+			else
+				dir = "right";
+			
+			logfile << myBlob.crossTime << "\t" << dir ;
+			std::clog << myBlob.crossTime << "\t" << dir ;
+			
 			if(myBlob.classifyMotorBike(frame, hog_bike) == true)
 			{	
 				mb.countRiders();
@@ -187,12 +198,18 @@ int main(int argc, char* argv[])
 				//Remove the following code (2 lines) later, Implement GUI --> Shreyas
 				cv::Mat ROI = frame(mb.currentBoundingRect);
 				cv::imwrite("./../bikes/Bike-"+std::to_string(time(0))+".jpg",ROI);
+				
+				logfile << " Bike\n";
+				std::clog << " Bike\n";
 			}
 			
 			else
 			{
 				cv::Mat ROI = frame(myBlob.currentBoundingRect);
 				cv::imwrite("./../blob_images/Other-"+std::to_string(time(0))+".jpg",ROI);
+				
+				logfile << " Other\n";
+				std::clog << " Other\n";
 			}
 		}
 		
@@ -313,9 +330,8 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, std::vector<Blob> &cro
 			{
 				time_t now = time(0);
 				char* dt = strtok(ctime(&now), "\n");
-				std::cout << dt << ", (Left)" << ", W=" << blob.currentBoundingRect.width << ",H=" << blob.currentBoundingRect.height << "\t"
-							<< ((float)blob.currentBoundingRect.width/(float)blob.currentBoundingRect.height) << std::endl;
-				logfile << dt << ", (Left)" << std::endl;
+				blob.crossTime = dt;
+				blob.directionLeft = true;
 				atLeastOneBlobCrossedTheLine = true;
 				currentBlobCrossedTheLine = true;
 				//blob.extractROI(frame, fgMask, true);
@@ -326,9 +342,8 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, std::vector<Blob> &cro
 			{
 				time_t now = time(0);
 				char* dt = strtok(ctime(&now), "\n");
-				std::cout << dt << ", (Right)" << ", W=" << blob.currentBoundingRect.width << ",H=" << blob.currentBoundingRect.height << "\t"
-								<< ((float)blob.currentBoundingRect.width/(float)blob.currentBoundingRect.height) << std::endl;
-				logfile << dt << ", (Right)" << std::endl;
+				blob.crossTime = dt;
+				blob.directionLeft = false;
 				atLeastOneBlobCrossedTheLine = true;
 				currentBlobCrossedTheLine = true;
 				//blob.extractROI(frame, fgMask, false);

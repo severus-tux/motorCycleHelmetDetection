@@ -6,6 +6,7 @@ MotorBike::MotorBike(const Blob &blob) : Blob(blob)
 	currentDiagonalSize = blob.currentDiagonalSize;
 	currentAspectRatio = blob.currentAspectRatio;
 	directionLeft = blob.directionLeft; // true => left, false => Right
+	crossTime = blob.crossTime;
 
 
 }

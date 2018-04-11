@@ -25,7 +25,9 @@ class Blob
 		bool currentMatchFound; // If true, Match found, else New Blob 
 		bool stillBeingTracked;
 		bool directionLeft; // true => left, false => Right
+		std::string crossTime;
 		int numOfConsecutiveFramesWithoutAMatch;
+		
 
 		cv::Point predictedNextPosition;
 
