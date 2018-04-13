@@ -7,6 +7,7 @@
 #include <opencv2/ml.hpp>
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>		// file utils
 #include <ctime>		// timestamp
 
@@ -64,7 +65,8 @@ int main(int argc, char* argv[])
 	std::cout << "Logging to: \"LOG-" << std::to_string(time(0)) << ".txt\"" << std::endl;
 
 	logfile << "\"Timestamp\t\", \"Direction\", \"Vehicle Type\", \"Triple Riding?\", \"Wearing Helmet\"" << std::endl;
-	std::clog << "\"Timestamp\t\", \"Direction\", \"Vehicle Type\", \"Triple Riding?\",  \"Wearing Helmet\"" << std::endl;
+	std::clog << "| Timestamp " << std::setw(25) <<"| Direction "<< std::setw(13) << "| Vehicle Type "
+			  << std::setw(14) <<"| Triple Riding " <<std::setw(15)<< "| Wearing Helmet" << std::endl;
 
 	if (!capVideo.isOpened())
 	{                                                 // if unable to open video file
@@ -126,7 +128,7 @@ int main(int argc, char* argv[])
 
 		fg->apply(frameCopy,fgMask,-1);
 		
-		cv::imshow("fgMask", fgMask);
+		//cv::imshow("fgMask", fgMask);
 
 		cv::Mat fgMaskCopy = fgMask.clone();
 		cv::morphologyEx(fgMaskCopy,fgMaskCopy,cv::MORPH_OPEN,structuringElement3x3,cv::Point(-1,-1),3,cv::BORDER_CONSTANT);
@@ -142,7 +144,7 @@ int main(int argc, char* argv[])
 		}
 		
 //		cv::drawContours(fgMaskCopy,convexHulls,-1,SCALAR_WHITE,-1);		
-		cv::imshow("fgMaskCopy", fgMaskCopy);
+//		cv::imshow("fgMaskCopy", fgMaskCopy);
 		
 		for (auto &convexHull : convexHulls)
 		{
