@@ -31,6 +31,7 @@ cv::Mat structuringElement15x15 = cv::getStructuringElement(cv::MORPH_RECT, cv::
 
 cv::HOGDescriptor hog_bike;
 cv::CascadeClassifier cascade_helmet;
+cv::CascadeClassifier cascade_head;
 
 // function prototypes 
 void matchCurrentFrameBlobsToExistingBlobs(std::vector<Blob> &existingBlobs, std::vector<Blob> &currentFrameBlobs);
@@ -51,7 +52,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	
-	int HelmetCount=0;
+	int HelmetCount=0, headCount=0;
 	cv::VideoCapture capVideo;
 	std::ofstream logfile; // log file
 	std::vector<Blob> blobs;
@@ -90,7 +91,13 @@ int main(int argc, char* argv[])
 	
 	if(!cascade_helmet.load( "../cascade/cascade.xml" ))
 	{
-		std::cerr << "error: could not load the cascade file helmet.yml\n";
+		std::cerr << "error: could not load the cascade file helmet.xml\n";
+		return 1;
+	}
+	
+	if(!cascade_head.load( "../cascade/cascade_head.xml" ))
+	{
+		std::cerr << "error: could not load the cascade file head.xml\n";
 		return 1;
 	}
 
@@ -201,7 +208,7 @@ int main(int argc, char* argv[])
 			
 			if(myBlob.classifyMotorBike(frame, hog_bike) == true)
 			{	
-				mb.countRiders();
+				headCount=mb.countRiders(frame, cascade_head);
 				HelmetCount=mb.detectHelmet(frame, cascade_helmet);
 				bikes.push_back(mb);
 				
@@ -209,10 +216,10 @@ int main(int argc, char* argv[])
 				//cv::Mat ROI = frame(mb.currentBoundingRect);
 				//mb.currentBoundingRect.height=(int)mb.currentBoundingRect.height*0.25;
 				//cv::Mat ROI_top = frame(mb.currentBoundingRect);
-				//cv::imwrite("./../bikes/Bike-"+std::to_string(time(0))+".jpg",ROI);
-				//cv::imwrite("./../bike_top/Bike-"+std::to_string(time(0))+".jpg",ROI_top);
-				logfile << " Bike - number of helmet = " << HelmetCount << "\n";
-				std::clog << " Bike - number of helmet = " << HelmetCount << "\n";
+				//cv::imwrite("./../Blobs/bike/"+std::to_string(time(0))+".jpg",ROI);
+				//cv::imwrite("./../Blobs/bike25/top-"+std::to_string(time(0))+".jpg",ROI_top);
+				logfile << " Bike - helmet count = " << HelmetCount << " , " << "rider count = " << headCount << "\n" ;
+				std::clog << " Bike - helmet count = " << HelmetCount << " , " << "rider count = " << headCount << "\n" ;
 			}
 			
 			else
@@ -220,8 +227,8 @@ int main(int argc, char* argv[])
 				//cv::Mat ROI = frame(myBlob.currentBoundingRect);
 				//myBlob.currentBoundingRect.height=myBlob.currentBoundingRect.height*0.25;
 				//cv::Mat ROI_top = frame(myBlob.currentBoundingRect);
-				//cv::imwrite("./../blob_images/Other-"+std::to_string(time(0))+".jpg",ROI);
-				//cv::imwrite("./../other_top/Other-"+std::to_string(time(0))+".jpg",ROI_top);
+				//cv::imwrite("./../Blobs/others/"+std::to_string(time(0))+".jpg",ROI);
+				//cv::imwrite("./../Blobs/others25/top-"+std::to_string(time(0))+".jpg",ROI_top);
 				logfile << " Other\n";
 				std::clog << " Other\n";
 			}

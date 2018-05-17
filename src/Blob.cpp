@@ -69,10 +69,12 @@ void Blob::extractROI(cv::Mat &frame, cv::Mat &fgMask, bool left)
 
 bool Blob::classifyMotorBike(cv::Mat &frame, cv::HOGDescriptor &hog)
 {
+	std::clog<<" here! ";
 	std::vector< cv::Rect > detections;
 	std::vector< double > foundWeights;
 	cv::Mat ROI = frame(currentBoundingRect);
 	cv::cvtColor(ROI,ROI,CV_BGR2GRAY);
+	std::clog<<" here! ";
 	hog.detectMultiScale( ROI, detections, foundWeights );
 	
 	for ( size_t j = 0; j < detections.size(); j++ )

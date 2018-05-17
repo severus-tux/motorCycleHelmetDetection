@@ -11,7 +11,7 @@ class MotorBike : public Blob
 		int HelmetCount;		
 		
 		MotorBike(const Blob &blob);
-		int countRiders();
+		int countRiders(cv::Mat &frame, cv::CascadeClassifier &head_cascade);
 		int detectHelmet(cv::Mat &frame, cv::CascadeClassifier &helmet_cascade);
 };
 
