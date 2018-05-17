@@ -30,6 +30,7 @@ cv::Mat structuringElement7x7 = cv::getStructuringElement(cv::MORPH_RECT, cv::Si
 cv::Mat structuringElement15x15 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15));
 
 cv::HOGDescriptor hog_bike;
+cv::CascadeClassifier cascade_helmet;
 
 // function prototypes 
 void matchCurrentFrameBlobsToExistingBlobs(std::vector<Blob> &existingBlobs, std::vector<Blob> &currentFrameBlobs);
@@ -50,6 +51,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	
+	int HelmetCount=0;
 	cv::VideoCapture capVideo;
 	std::ofstream logfile; // log file
 	std::vector<Blob> blobs;
@@ -66,7 +68,7 @@ int main(int argc, char* argv[])
 
 	logfile << "\"Timestamp\t\", \"Direction\", \"Vehicle Type\", \"Triple Riding?\", \"Wearing Helmet\"" << std::endl;
 	std::clog << "| Timestamp " << std::setw(25) <<"| Direction "<< std::setw(13) << "| Vehicle Type "
-			  << std::setw(14) <<"| Triple Riding " <<std::setw(15)<< "| Wearing Helmet" << std::endl;
+			  << std::setw(14) <<"| Triple Riding " <<std::setw(15)<< "| Rider Count" << std::setw(15) << "| Helmet Count" << std::endl;
 
 	if (!capVideo.isOpened())
 	{                                                 // if unable to open video file
@@ -83,6 +85,12 @@ int main(int argc, char* argv[])
 	if(!hog_bike.load( "../cascade/bikes.yml" ))
 	{
 		std::cerr << "error: could not load the cascade file bike.yml\n";
+		return 1;
+	}
+	
+	if(!cascade_helmet.load( "../cascade/cascade.xml" ))
+	{
+		std::cerr << "error: could not load the cascade file helmet.yml\n";
 		return 1;
 	}
 
@@ -194,22 +202,26 @@ int main(int argc, char* argv[])
 			if(myBlob.classifyMotorBike(frame, hog_bike) == true)
 			{	
 				mb.countRiders();
-				mb.detectHelmet();
+				HelmetCount=mb.detectHelmet(frame, cascade_helmet);
 				bikes.push_back(mb);
 				
 				//Remove the following code (2 lines) later, Implement GUI --> Shreyas
-				cv::Mat ROI = frame(mb.currentBoundingRect);
-				cv::imwrite("./../bikes/Bike-"+std::to_string(time(0))+".jpg",ROI);
-				
-				logfile << " Bike\n";
-				std::clog << " Bike\n";
+				//cv::Mat ROI = frame(mb.currentBoundingRect);
+				//mb.currentBoundingRect.height=(int)mb.currentBoundingRect.height*0.25;
+				//cv::Mat ROI_top = frame(mb.currentBoundingRect);
+				//cv::imwrite("./../bikes/Bike-"+std::to_string(time(0))+".jpg",ROI);
+				//cv::imwrite("./../bike_top/Bike-"+std::to_string(time(0))+".jpg",ROI_top);
+				logfile << " Bike - number of helmet = " << HelmetCount << "\n";
+				std::clog << " Bike - number of helmet = " << HelmetCount << "\n";
 			}
 			
 			else
 			{
-				cv::Mat ROI = frame(myBlob.currentBoundingRect);
-				cv::imwrite("./../blob_images/Other-"+std::to_string(time(0))+".jpg",ROI);
-				
+				//cv::Mat ROI = frame(myBlob.currentBoundingRect);
+				//myBlob.currentBoundingRect.height=myBlob.currentBoundingRect.height*0.25;
+				//cv::Mat ROI_top = frame(myBlob.currentBoundingRect);
+				//cv::imwrite("./../blob_images/Other-"+std::to_string(time(0))+".jpg",ROI);
+				//cv::imwrite("./../other_top/Other-"+std::to_string(time(0))+".jpg",ROI_top);
 				logfile << " Other\n";
 				std::clog << " Other\n";
 			}
@@ -229,7 +241,6 @@ int main(int argc, char* argv[])
 				
 		cv::line(frameCopy2, crossingLine[0], crossingLine[1], SCALAR_BLUE, 2);
 		cv::imshow("frameCopy2", frameCopy2);
-
 		firstFrame = false;
 		frameCount++;
 		checkForEscKey = cv::waitKey(33);
@@ -238,6 +249,16 @@ int main(int argc, char* argv[])
 		{
 			logfile.close();
 			break;
+		}
+		
+		if(checkForEscKey == (int) 'p')
+		{
+			while( checkForEscKey == (int) 'p' )
+			{
+				checkForEscKey = cv::waitKey(0);
+				if(checkForEscKey == (int) 'p')
+					break;
+			}
 		}
 	}
 

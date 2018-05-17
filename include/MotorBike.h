@@ -6,13 +6,13 @@
 class MotorBike : public Blob
 {
 	public :
-		cv::Rect ROI;
+		cv::Rect ROITop;
 		int riderCount;
 		int HelmetCount;		
 		
 		MotorBike(const Blob &blob);
 		int countRiders();
-		int detectHelmet();
+		int detectHelmet(cv::Mat &frame, cv::CascadeClassifier &helmet_cascade);
 };
 
 #endif 
