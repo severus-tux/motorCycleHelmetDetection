@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 		}
 		
 //		cv::drawContours(fgMaskCopy,convexHulls,-1,SCALAR_WHITE,-1);		
-//		cv::imshow("fgMaskCopy", fgMaskCopy);
+	//	cv::imshow("fgMaskCopy", fgMaskCopy);
 		
 		for (auto &convexHull : convexHulls)
 		{
@@ -199,9 +199,9 @@ int main(int argc, char* argv[])
 			std::string dir;
 			
 			if ( myBlob.directionLeft )
-				dir = "left";
+				dir = "left  ";
 			else
-				dir = "right";
+				dir = "right ";
 			
 			logfile << myBlob.crossTime << "\t" << dir ;
 			std::clog << myBlob.crossTime << "\t" << dir ;
@@ -212,14 +212,26 @@ int main(int argc, char* argv[])
 				HelmetCount=mb.detectHelmet(frame, cascade_helmet);
 				bikes.push_back(mb);
 				
+				if(headCount<1)
+					headCount=1;
+					
+				if(HelmetCount>headCount)
+					HelmetCount=headCount;
+				
+				//for ( int j = 0; j < mb.detectionsHead.size(); j++ )
+				//	cv::rectangle(frameCopy2, mb.detectionsHead[j], SCALAR_BLUE, 2);
+				
+				//for ( int j = 0; j < mb.detectionsHelmet.size(); j++ )
+				//	cv::rectangle(frameCopy2, mb.detectionsHelmet[j], SCALAR_GREEN, 2);
+				
 				//Remove the following code (2 lines) later, Implement GUI --> Shreyas
 				//cv::Mat ROI = frame(mb.currentBoundingRect);
 				//mb.currentBoundingRect.height=(int)mb.currentBoundingRect.height*0.25;
 				//cv::Mat ROI_top = frame(mb.currentBoundingRect);
 				//cv::imwrite("./../Blobs/bike/"+std::to_string(time(0))+".jpg",ROI);
 				//cv::imwrite("./../Blobs/bike25/top-"+std::to_string(time(0))+".jpg",ROI_top);
-				logfile << " Bike - helmet count = " << HelmetCount << " , " << "rider count = " << headCount << "\n" ;
-				std::clog << " Bike - helmet count = " << HelmetCount << " , " << "rider count = " << headCount << "\n" ;
+				logfile << "  Bike - helmet count = " << HelmetCount << " , " << "rider count = " << headCount << "\n" ;
+				std::clog << " \033[32;1m Bike - helmet count = " << HelmetCount << " , " << "rider count = " << headCount << "\n\033[0m" ;
 			}
 			
 			else
@@ -230,7 +242,7 @@ int main(int argc, char* argv[])
 				//cv::imwrite("./../Blobs/others/"+std::to_string(time(0))+".jpg",ROI);
 				//cv::imwrite("./../Blobs/others25/top-"+std::to_string(time(0))+".jpg",ROI_top);
 				logfile << " Other\n";
-				std::clog << " Other\n";
+				std::clog << " \033[31;1m Other\n\033[0m";
 			}
 		}
 		
