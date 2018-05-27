@@ -61,6 +61,9 @@ int main(int argc, char* argv[])
 	cv::Ptr<cv::BackgroundSubtractor> fg;
 	fg=cv::createBackgroundSubtractorMOG2(500,16,false);//CNT(1,false,30*60,true);
 	capVideo.open(argv[1]);
+	
+	cv::namedWindow("frameCopy2", cv::WINDOW_NORMAL);
+	cv::resizeWindow("frameCopy2", 640, 360);
 
 
 	// log file
