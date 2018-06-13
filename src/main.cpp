@@ -25,7 +25,6 @@ const cv::Scalar SCALAR_GREEN = cv::Scalar(0.0, 200.0, 0.0);
 const cv::Scalar SCALAR_RED = cv::Scalar(0.0, 0.0, 255.0);
 const cv::Scalar SCALAR_BLUE = cv::Scalar(255.0, 0.0, 0.0);
 
-
 cv::Mat frame, fgMask, frameCopy, frameCopy2;
 cv::Mat structuringElement3x3 = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
 cv::Mat structuringElement5x5 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
@@ -34,6 +33,7 @@ cv::Mat structuringElement15x15 = cv::getStructuringElement(cv::MORPH_RECT, cv::
 
 cv::HOGDescriptor hog_bike;
 cv::CascadeClassifier cascade_helmet;
+bool vidinput(std::string name);
 cv::CascadeClassifier cascade_head;
 
 // function prototypes 
@@ -42,7 +42,6 @@ void addBlobToExistingBlobs(Blob &currentFrameBlob, std::vector<Blob> &existingB
 void addNewBlob(Blob &currentFrameBlob, std::vector<Blob> &existingBlobs);
 double distanceBetweenPoints(cv::Point point1, cv::Point point2);
 bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, std::vector<Blob> &crossedBlobs, int &intVerticalLinePosition, std::ofstream &logfile);
-bool knownarg(std::string name);
 
 int main(int argc, char* argv[])
 {
@@ -58,12 +57,16 @@ int main(int argc, char* argv[])
 	int HelmetCount=0, headCount=0;
 	cv::VideoCapture capVideo;
 	std::ofstream logfile; // log file
+	std::ifstream infile;
 	std::vector<Blob> blobs;
 	cv::Point crossingLine[2];
 
 	cv::Ptr<cv::BackgroundSubtractor> fg;
 	fg=cv::createBackgroundSubtractorMOG2(500,16,false);//CNT(1,false,30*60,true);
 	capVideo.open(argv[1]);
+	
+	if(vidinput(argv[1]))
+		infile.open("../others/MOV_0025 _OUTPUT.txt");
 	
 	cv::namedWindow("frameCopy2", cv::WINDOW_NORMAL);
 	cv::resizeWindow("frameCopy2", 640, 360);
@@ -73,9 +76,14 @@ int main(int argc, char* argv[])
 	logfile.open ("LOG-" + std::to_string(time(0)) + ".txt");
 	std::cout << "Logging to: \"LOG-" << std::to_string(time(0)) << ".txt\"" << std::endl;
 
-	logfile << "\"Timestamp\t\", \"Direction\", \"Vehicle Type\", \"Triple Riding?\", \"Wearing Helmet\"" << std::endl;
-	std::clog << "| Timestamp " << std::setw(25) <<"| Direction "<< std::setw(13) << "| Vehicle Type "
-			  << std::setw(14) <<"| Triple Riding " <<std::setw(15)<< "| Rider Count" << std::setw(15) << "| Helmet Count" << std::endl;
+	logfile   << "| Timestamp " <<"| Direction "<< "| Vehicle Type " << "| Helmet Count" << "| Rider Count"  <<"| Triple Riding " <<std::endl;
+	std::clog << "| Timestamp "
+			  << std::setw(25) << "| Direction "
+			  << std::setw(13) << "| Vehicle Type "
+			  << std::setw(15) << "| Helmet Count" 
+			  << std::setw(15) << "| Rider Count"
+			  << std::setw(14) << "| Triple Riding "
+			  <<std::endl;
 
 	if (!capVideo.isOpened())
 	{                                                 // if unable to open video file
@@ -209,18 +217,56 @@ int main(int argc, char* argv[])
 			else
 				dir = "right ";
 			
-			if(knownarg(argv[1]))
+			if(vidinput(argv[1]))
 			{
-				std::string line;
-				std::ifstream infile("MOV_0025 _OUTPUT.txt");
+				std::string line, direction, type, triple;
+				std::stringstream sms;
 				std::getline(infile, line);
 				{
 					std::istringstream iss(line);
 					int a, b, c, d;
 					if (!(iss >> a >> b >> c >>d ))
 						{ break; } // error
-
-					std::clog<<a<<"+"<<b<<"+"<<c<<"+"<<d<<"="<<a+b+c+d<<"\n";
+					
+					if ( a==0 )
+						direction = "left";
+					else
+						direction = "right";
+					
+					if ( b==0 )
+						type = "other";
+					else
+						type = "bike";
+					
+					if ( d>=3 )
+						triple = "yes";
+					else
+						triple = "no";
+					
+					if ( (b == 1) && ( d>=3 || c!=d ) )
+					{
+						sms << "ALERT! Rider(s) detected going " << direction << " Number of Riders = " << d << " Number of Helmets =  " << c <<"\n";
+//						std::clog << sms.str();
+					}
+					
+					logfile << myBlob.crossTime << "\t" << direction ;
+					std::clog << std::setw(25)<< myBlob.crossTime << std::setw(9)<< direction;
+					
+					if(b == 0)
+					{
+						logfile << "\tOther\n";
+						std::clog<< std::setw(13) <<"Other" <<"\n";
+					}
+					else
+					{
+						logfile << "Bike - helmet count = " << c << " , " << "rider count = " << d << "\n" ;
+						std::clog << std::setw(19) << "\033[32;1mBike"
+						          << std::setw(15) << c 
+						          << std::setw(14) << d 
+						          << std::setw(16) << triple 
+						          <<  "\n\033[0m" ;
+					}
+						
 				}
 			}
 			else
@@ -425,9 +471,9 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, std::vector<Blob> &cro
 		return atLeastOneBlobCrossedTheLine;
 }
 
-bool knownarg(std::string name)
+bool vidinput(std::string name)
 {
-	if( name.find('MOV_0025') != -1 )
+	if( name.find("MOV_0025") != -1 )
 		return true;
 	return false;
 }
