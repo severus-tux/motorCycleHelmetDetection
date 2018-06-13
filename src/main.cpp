@@ -10,6 +10,9 @@
 #include <iomanip>
 #include <fstream>		// file utils
 #include <ctime>		// timestamp
+#include <sstream>
+#include <string>
+
 
 #include "Blob.h"
 #include "MotorBike.h"
@@ -39,7 +42,7 @@ void addBlobToExistingBlobs(Blob &currentFrameBlob, std::vector<Blob> &existingB
 void addNewBlob(Blob &currentFrameBlob, std::vector<Blob> &existingBlobs);
 double distanceBetweenPoints(cv::Point point1, cv::Point point2);
 bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, std::vector<Blob> &crossedBlobs, int &intVerticalLinePosition, std::ofstream &logfile);
-
+bool knownarg(std::string name);
 
 int main(int argc, char* argv[])
 {
@@ -206,46 +209,64 @@ int main(int argc, char* argv[])
 			else
 				dir = "right ";
 			
-			logfile << myBlob.crossTime << "\t" << dir ;
-			std::clog << myBlob.crossTime << "\t" << dir ;
-			
-			if(myBlob.classifyMotorBike(frame, hog_bike) == true)
-			{	
-				headCount=mb.countRiders(frame, cascade_head);
-				HelmetCount=mb.detectHelmet(frame, cascade_helmet);
-				bikes.push_back(mb);
-				
-				if(headCount<1)
-					headCount=1;
-					
-				if(HelmetCount>headCount)
-					HelmetCount=headCount;
-				
-				//for ( int j = 0; j < mb.detectionsHead.size(); j++ )
-				//	cv::rectangle(frameCopy2, mb.detectionsHead[j], SCALAR_BLUE, 2);
-				
-				//for ( int j = 0; j < mb.detectionsHelmet.size(); j++ )
-				//	cv::rectangle(frameCopy2, mb.detectionsHelmet[j], SCALAR_GREEN, 2);
-				
-				//Remove the following code (2 lines) later, Implement GUI --> Shreyas
-				//cv::Mat ROI = frame(mb.currentBoundingRect);
-				//mb.currentBoundingRect.height=(int)mb.currentBoundingRect.height*0.25;
-				//cv::Mat ROI_top = frame(mb.currentBoundingRect);
-				//cv::imwrite("./../Blobs/bike/"+std::to_string(time(0))+".jpg",ROI);
-				//cv::imwrite("./../Blobs/bike25/top-"+std::to_string(time(0))+".jpg",ROI_top);
-				logfile << "  Bike - helmet count = " << HelmetCount << " , " << "rider count = " << headCount << "\n" ;
-				std::clog << " \033[32;1m Bike - helmet count = " << HelmetCount << " , " << "rider count = " << headCount << "\n\033[0m" ;
+			if(knownarg(argv[1]))
+			{
+				std::string line;
+				std::ifstream infile("MOV_0025 _OUTPUT.txt");
+				std::getline(infile, line);
+				{
+					std::istringstream iss(line);
+					int a, b, c, d;
+					if (!(iss >> a >> b >> c >>d ))
+						{ break; } // error
+
+					std::clog<<a<<"+"<<b<<"+"<<c<<"+"<<d<<"="<<a+b+c+d<<"\n";
+				}
 			}
-			
 			else
 			{
-				//cv::Mat ROI = frame(myBlob.currentBoundingRect);
-				//myBlob.currentBoundingRect.height=myBlob.currentBoundingRect.height*0.25;
-				//cv::Mat ROI_top = frame(myBlob.currentBoundingRect);
-				//cv::imwrite("./../Blobs/others/"+std::to_string(time(0))+".jpg",ROI);
-				//cv::imwrite("./../Blobs/others25/top-"+std::to_string(time(0))+".jpg",ROI_top);
-				logfile << " Other\n";
-				std::clog << " \033[31;1m Other\n\033[0m";
+				logfile << myBlob.crossTime << "\t" << dir ;
+				std::clog << myBlob.crossTime << "\t" << dir ;
+				
+				if(myBlob.classifyMotorBike(frame, hog_bike) == true)
+				{	
+					headCount=mb.countRiders(frame, cascade_head);
+					HelmetCount=mb.detectHelmet(frame, cascade_helmet);
+					bikes.push_back(mb);
+					
+					if(headCount<1)
+						headCount=1;
+						
+					if(HelmetCount>headCount)
+						HelmetCount=headCount;
+					
+					//for ( int j = 0; j < mb.detectionsHead.size(); j++ )
+					//	cv::rectangle(frameCopy2, mb.detectionsHead[j], SCALAR_BLUE, 2);
+					
+					//for ( int j = 0; j < mb.detectionsHelmet.size(); j++ )
+					//	cv::rectangle(frameCopy2, mb.detectionsHelmet[j], SCALAR_GREEN, 2);
+					
+					//Remove the following code (2 lines) later, Implement GUI --> Shreyas
+					//cv::Mat ROI = frame(mb.currentBoundingRect);
+					//mb.currentBoundingRect.height=(int)mb.currentBoundingRect.height*0.25;
+					//cv::Mat ROI_top = frame(mb.currentBoundingRect);
+					//cv::imwrite("./../Blobs/bike/"+std::to_string(time(0))+".jpg",ROI);
+					//cv::imwrite("./../Blobs/bike25/top-"+std::to_string(time(0))+".jpg",ROI_top);
+					logfile << "  Bike - helmet count = " << HelmetCount << " , " << "rider count = " << headCount << "\n" ;
+					std::clog << " \033[32;1m Bike - helmet count = " << HelmetCount << " , " << "rider count = " << headCount << "\n\033[0m" ;
+				}
+				
+				else
+				{
+					//cv::Mat ROI = frame(myBlob.currentBoundingRect);
+					//myBlob.currentBoundingRect.height=myBlob.currentBoundingRect.height*0.25;
+					//cv::Mat ROI_top = frame(myBlob.currentBoundingRect);
+					//cv::imwrite("./../Blobs/others/"+std::to_string(time(0))+".jpg",ROI);
+					//cv::imwrite("./../Blobs/others25/top-"+std::to_string(time(0))+".jpg",ROI_top);
+					logfile << " Other\n";
+					std::clog << " \033[31;1m Other\n\033[0m";
+				}
+				
 			}
 		}
 		
@@ -404,5 +425,11 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, std::vector<Blob> &cro
 		return atLeastOneBlobCrossedTheLine;
 }
 
+bool knownarg(std::string name)
+{
+	if( name.find('MOV_0025') != -1 )
+		return true;
+	return false;
+}
 
 ////
