@@ -98,11 +98,11 @@ int main(int argc, char* argv[])
 		return 1;                                                              // and exit program
 	}
 
-	if (capVideo.get(CV_CAP_PROP_FRAME_COUNT) < 2)
-	{
-		std::cerr << "error: video file must have at least two frames\n";
-		return 1;
-	}
+//	if (capVideo.get(CV_CAP_PROP_FRAME_COUNT) < 2)
+//	{
+//		std::cerr << "error: video file must have at least two frames\n";
+//		return 1;
+//	}
 	
 	if(!hog_bike.load( "../cascade/bikes.yml" ))
 	{
