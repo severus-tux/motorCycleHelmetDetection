@@ -76,14 +76,14 @@ int main(int argc, char* argv[])
 	}
 	
 	cv::namedWindow("frameCopy2", cv::WINDOW_NORMAL);
+	cv::namedWindow("ROI",cv::WINDOW_NORMAL);
+	cv::resizeWindow("ROI",500,300);
 	cv::resizeWindow("frameCopy2", 640, 360);
 
 
 	// log file
 	logfile.open ("LOG-" + std::to_string(time(0)) + ".txt");
-	std::cout << "Logging to: \"LOG-" << std::to_string(time(0)) << ".txt\"" << std::endl;
-
-	logfile   << "| Timestamp " <<"| Direction "<< "| Vehicle Type " << "| Helmet Count" << "| Rider Count"  <<"| Triple Riding " <<std::endl;
+	std::clog << "Logging to: \"LOG-" << std::to_string(time(0)) << ".txt\"" << std::endl;
 	std::clog << "| Timestamp "
 			  << std::setw(25) << "| Direction "
 			  << std::setw(13) << "| Vehicle Type "
@@ -91,6 +91,13 @@ int main(int argc, char* argv[])
 			  << std::setw(15) << "| Rider Count"
 			  << std::setw(14) << "| Triple Riding "
 			  <<std::endl;
+	logfile << "| Timestamp "
+			<< std::setw(25) << "| Direction "
+			<< std::setw(13) << "| Vehicle Type "
+			<< std::setw(15) << "| Helmet Count" 
+			<< std::setw(15) << "| Rider Count"
+			<< std::setw(14) << "| Triple Riding "
+			<<std::endl;
 
 	if (!capVideo.isOpened())
 	{                                                 // if unable to open video file
@@ -148,10 +155,10 @@ int main(int argc, char* argv[])
 		{
 			time_t now = time(0);
 			char* dt = strtok(ctime(&now), "\n");
-			std::cout << dt << ",EOF" << std::endl;
+			std::clog << dt << ",EOF" << std::endl;
 			logfile << dt << ",EOF" << std::endl;
 			logfile.close();
-			std::cout << "Video input ended\nSaving log file...\nExiting..\n";
+			std::clog << "Video input ended\nSaving log file...\nExiting..\n";
 			return(0);
 		}
 		
@@ -209,7 +216,7 @@ int main(int argc, char* argv[])
 			matchCurrentFrameBlobsToExistingBlobs(blobs, currentFrameBlobs);
 
 		checkIfBlobsCrossedTheLine(blobs, crossedBlobs, verticalLinePosition, logfile);
-		//Clearig un-interesting blobs
+		//Clearing un-interesting blobs
 		currentFrameBlobs.clear();
 		currentFrameBlobs.shrink_to_fit();
 		
@@ -226,55 +233,75 @@ int main(int argc, char* argv[])
 			
 			if(vidinput(argv[1]))
 			{
-				std::string line, direction, type, triple;
-				std::stringstream sms, command;
+				std::string line, direction, dirsms, type, triple;
+				std::stringstream sms, command, roitext;
 				std::getline(infile, line);
 				{
 					std::istringstream iss(line);
 					int a, b, c, d;
 					if (!(iss >> a >> b >> c >>d ))
 						{ break; } // error
-					
 					if ( a==0 )
+					{
 						direction = "left";
+						dirsms = "RV Clg Jn";
+					}
 					else
+					{
 						direction = "right";
-					
+						dirsms = "Kengeri Rly Stn";
+					}
 					if ( b==0 )
-						type = "other";
+						type = "Other";
 					else
-						type = "bike";
-					
+						type = "Bike";
 					if ( d>=3 )
-						triple = "yes";
+						triple = "Yes";
 					else
-						triple = "no";
-					
+						triple = "No";
+						
 					if ( (b == 1) && ( d>=3 || c!=d ) )
 					{
-						sms << "\"ALERT! Rider(s) detected going " << direction << " Number of Riders = " << d << " Number of Helmets =  " << c <<"\"";
+						sms << "\"ALERT! Rider(s) detected going " 
+						    << dirsms << "(" << direction << ")"
+						    << " Number of Rider(s) = " << d 
+						    << " Number of Helmet(s) = " << c <<"\"";
 						command << "python ../src/sms.py " << sms.str();
-						system(command.str().c_str());						
+						//system(command.str().c_str());						
 					}
-					
-					logfile << myBlob.crossTime << "\t" << direction ;
+					logfile << std::setw(25)<< myBlob.crossTime << std::setw(9)<< direction;
 					std::clog << std::setw(25)<< myBlob.crossTime << std::setw(9)<< direction;
 					
 					if(b == 0)
 					{
-						logfile << "\tOther\n";
-						std::clog<< std::setw(13) <<"Other" <<"\n";
+						std::clog << std::setw(13) <<"Other" <<"\n";
+						logfile << std::setw(13) <<"Other" <<"\n";
 					}
 					else
 					{
-						logfile << "Bike - helmet count = " << c << " , " << "rider count = " << d << "\n" ;
+						logfile << std::setw(13) << "Bike"
+						          << std::setw(15) << c 
+						          << std::setw(14) << d 
+						          << std::setw(16) << triple 
+						          <<  "\n" ;
 						std::clog << std::setw(19) << "\033[32;1mBike"
 						          << std::setw(15) << c 
 						          << std::setw(14) << d 
 						          << std::setw(16) << triple 
 						          <<  "\n\033[0m" ;
 					}
-						
+					if ( b==0 )
+						roitext << type ;
+					else
+						roitext << type << " HC-" << c << " RC-" << d << " TR-" << triple ;
+					
+					cv::Mat ROI = frame(myBlob.currentBoundingRect);
+					cv::resize(ROI,ROI,cv::Size(500,300));
+					cv::Point location;
+					location.x = 0;
+					location.y = ROI.rows-4;
+					cv::putText(ROI,roitext.str(), location,cv::FONT_HERSHEY_COMPLEX_SMALL,1,SCALAR_GREEN,2,true);
+					cv::imshow("ROI",ROI);
 				}
 			}
 			else
@@ -350,6 +377,8 @@ int main(int argc, char* argv[])
 		
 		if(checkForEscKey == (int) 'p')
 		{
+			cv::putText(frameCopy2,"PAUSED",cv::Point(5,710),cv::FONT_HERSHEY_COMPLEX_SMALL,2,SCALAR_RED,3);
+			cv::imshow("frameCopy2", frameCopy2);
 			while( checkForEscKey == (int) 'p' )
 			{
 				checkForEscKey = cv::waitKey(0);
