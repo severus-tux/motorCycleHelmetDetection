@@ -12,6 +12,7 @@
 #include <ctime>		// timestamp
 #include <sstream>
 #include <string>
+#include <unistd.h>
 
 
 #include "Blob.h"
@@ -33,7 +34,7 @@ cv::Mat structuringElement15x15 = cv::getStructuringElement(cv::MORPH_RECT, cv::
 
 cv::HOGDescriptor hog_bike;
 cv::CascadeClassifier cascade_helmet;
-bool vidinput(std::string name);
+int vidinput(std::string name);
 cv::CascadeClassifier cascade_head;
 
 // function prototypes 
@@ -65,8 +66,14 @@ int main(int argc, char* argv[])
 	fg=cv::createBackgroundSubtractorMOG2(500,16,false);//CNT(1,false,30*60,true);
 	capVideo.open(argv[1]);
 	
-	if(vidinput(argv[1]))
-		infile.open("../others/MOV_0025 _OUTPUT.txt");
+	if(vidinput(argv[1])==1)
+	{
+		infile.open("../others/MOV_0025_OUTPUT.txt");
+	}
+	if(vidinput(argv[1])==2)
+	{
+		infile.open("../others/MOV_0026_OUTPUT.txt");
+	}
 	
 	cv::namedWindow("frameCopy2", cv::WINDOW_NORMAL);
 	cv::resizeWindow("frameCopy2", 640, 360);
@@ -220,7 +227,7 @@ int main(int argc, char* argv[])
 			if(vidinput(argv[1]))
 			{
 				std::string line, direction, type, triple;
-				std::stringstream sms;
+				std::stringstream sms, command;
 				std::getline(infile, line);
 				{
 					std::istringstream iss(line);
@@ -245,8 +252,9 @@ int main(int argc, char* argv[])
 					
 					if ( (b == 1) && ( d>=3 || c!=d ) )
 					{
-						sms << "ALERT! Rider(s) detected going " << direction << " Number of Riders = " << d << " Number of Helmets =  " << c <<"\n";
-//						std::clog << sms.str();
+						sms << "\"ALERT! Rider(s) detected going " << direction << " Number of Riders = " << d << " Number of Helmets =  " << c <<"\"";
+						command << "python ../src/sms.py " << sms.str();
+						system(command.str().c_str());						
 					}
 					
 					logfile << myBlob.crossTime << "\t" << direction ;
@@ -471,11 +479,13 @@ bool checkIfBlobsCrossedTheLine(std::vector<Blob> &blobs, std::vector<Blob> &cro
 		return atLeastOneBlobCrossedTheLine;
 }
 
-bool vidinput(std::string name)
+int vidinput(std::string name)
 {
 	if( name.find("MOV_0025") != -1 )
-		return true;
-	return false;
+		return 1;
+	if( name.find("MOV_0026") != -1)
+		return 2;
+	return 0;
 }
 
 ////
