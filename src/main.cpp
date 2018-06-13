@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	
-	int HelmetCount=0, headCount=0;
+	int HelmetCount=0, headCount=0, serialCountforOutput=1;
 	cv::VideoCapture capVideo;
 	std::ofstream logfile; // log file
 	std::ifstream infile;
@@ -68,11 +68,11 @@ int main(int argc, char* argv[])
 	
 	if(vidinput(argv[1])==1)
 	{
-		infile.open("../others/MOV_0025_OUTPUT.txt");
+		infile.open("../others/MOV_0025_INPUT.txt");
 	}
 	if(vidinput(argv[1])==2)
 	{
-		infile.open("../others/MOV_0026_OUTPUT.txt");
+		infile.open("../others/MOV_0026_INPUT.txt");
 	}
 	
 	cv::namedWindow("frameCopy2", cv::WINDOW_NORMAL);
@@ -84,14 +84,16 @@ int main(int argc, char* argv[])
 	// log file
 	logfile.open ("LOG-" + std::to_string(time(0)) + ".txt");
 	std::clog << "Logging to: \"LOG-" << std::to_string(time(0)) << ".txt\"" << std::endl;
-	std::clog << "| Timestamp "
+	std::clog << "NO. "
+	 		  << std::setw(4) << "| Timestamp "
 			  << std::setw(25) << "| Direction "
 			  << std::setw(13) << "| Vehicle Type "
 			  << std::setw(15) << "| Helmet Count" 
 			  << std::setw(15) << "| Rider Count"
 			  << std::setw(14) << "| Triple Riding "
 			  <<std::endl;
-	logfile << "| Timestamp "
+	logfile << "NO. "
+	 		<< std::setw(4) << "| Timestamp "
 			<< std::setw(25) << "| Direction "
 			<< std::setw(13) << "| Vehicle Type "
 			<< std::setw(15) << "| Helmet Count" 
@@ -243,22 +245,22 @@ int main(int argc, char* argv[])
 						{ break; } // error
 					if ( a==0 )
 					{
-						direction = "left";
+						direction = "LEFT";
 						dirsms = "RV Clg Jn";
 					}
 					else
 					{
-						direction = "right";
+						direction = "RIGHT";
 						dirsms = "Kengeri Rly Stn";
 					}
 					if ( b==0 )
-						type = "Other";
+						type = "OTHER";
 					else
-						type = "Bike";
+						type = "BIKE";
 					if ( d>=3 )
-						triple = "Yes";
+						triple = "YES";
 					else
-						triple = "No";
+						triple = "NO";
 						
 					if ( (b == 1) && ( d>=3 || c!=d ) )
 					{
@@ -269,9 +271,9 @@ int main(int argc, char* argv[])
 						command << "python ../src/sms.py " << sms.str();
 						//system(command.str().c_str());						
 					}
-					logfile << std::setw(25)<< myBlob.crossTime << std::setw(9)<< direction;
-					std::clog << std::setw(25)<< myBlob.crossTime << std::setw(9)<< direction;
-					
+					logfile << std::setw(3) << serialCountforOutput << std::setw(27)<< myBlob.crossTime << std::setw(9)<< direction;
+					std::clog << std::setw(3) << serialCountforOutput << std::setw(27)<< myBlob.crossTime << std::setw(9)<< direction;
+					serialCountforOutput++;
 					if(b == 0)
 					{
 						std::clog << std::setw(13) <<"Other" <<"\n";
@@ -299,16 +301,16 @@ int main(int argc, char* argv[])
 					cv::resize(ROI,ROI,cv::Size(500,300));
 					cv::Point location;
 					location.x = 0;
-					location.y = ROI.rows-4;
-					cv::putText(ROI,roitext.str(), location,cv::FONT_HERSHEY_COMPLEX_SMALL,1,SCALAR_GREEN,2,true);
+					location.y = ROI.rows-6;
+					cv::putText(ROI,roitext.str(), location,cv::FONT_HERSHEY_SIMPLEX,1,SCALAR_GREEN,2,true);
 					cv::imshow("ROI",ROI);
 				}
 			}
 			else
 			{
 				logfile << myBlob.crossTime << "\t" << dir ;
-				std::clog << myBlob.crossTime << "\t" << dir ;
-				
+				std::clog << serialCountforOutput << " " << myBlob.crossTime << "\t" << dir ;
+				serialCountforOutput++;
 				if(myBlob.classifyMotorBike(frame, hog_bike) == true)
 				{	
 					headCount=mb.countRiders(frame, cascade_head);
@@ -363,7 +365,9 @@ int main(int argc, char* argv[])
 		crossedBlobs.clear();
 		crossedBlobs.shrink_to_fit();
 				
-		cv::line(frameCopy2, crossingLine[0], crossingLine[1], SCALAR_BLUE, 2);
+		cv::line(frameCopy2, crossingLine[0], crossingLine[1], SCALAR_BLUE, 3);
+		cv::putText(frameCopy2,"<--RV CLG Jn",cv::Point(5,190),cv::FONT_HERSHEY_SIMPLEX,1,SCALAR_RED,2);
+		cv::putText(frameCopy2,"Kengeri Rly Stn-->",cv::Point(950,190),cv::FONT_HERSHEY_SIMPLEX,1,SCALAR_RED,2);
 		cv::imshow("frameCopy2", frameCopy2);
 		firstFrame = false;
 		frameCount++;
@@ -516,5 +520,3 @@ int vidinput(std::string name)
 		return 2;
 	return 0;
 }
-
-////
