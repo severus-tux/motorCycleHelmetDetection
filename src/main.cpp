@@ -265,11 +265,11 @@ int main(int argc, char* argv[])
 					if ( (b == 1) && ( d>=3 || c!=d ) )
 					{
 						sms << "\"ALERT! Rider(s) detected going " 
-						    << dirsms << "(" << direction << ")"
+						    << dirsms << " (" << direction << ")"
 						    << " Number of Rider(s) = " << d 
 						    << " Number of Helmet(s) = " << c <<"\"";
 						command << "python ../src/sms.py " << sms.str();
-						//system(command.str().c_str());						
+						system(command.str().c_str());						
 					}
 					logfile << std::setw(3) << serialCountforOutput << std::setw(27)<< myBlob.crossTime << std::setw(9)<< direction;
 					std::clog << std::setw(3) << serialCountforOutput << std::setw(27)<< myBlob.crossTime << std::setw(9)<< direction;
