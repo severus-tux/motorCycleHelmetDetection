@@ -16,6 +16,6 @@ def sendSMS(apikey, numbers, sender, message):
 
 message = (" ".join(sys.argv[1:]))
 
-resp =  sendSMS('+xHt9RJlU1Y-sJB8P6D5jMzuU00wPOXBa68OdEr8FD', '917019441892',
+resp =  sendSMS('+xHt9RJlU1Y-sJB8P6D5jMzuU00wPOXBa68OdEr8FD', '91701944XXXX',
     'TXTLCL', message)
 #print (resp)
